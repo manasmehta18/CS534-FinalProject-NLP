@@ -31,9 +31,9 @@ class Modules:
 
         # Data seperation:
         if subset == 'train':
-            self.seperate_data(0.6)
+            self.seperate_data(0.8)
         elif subset == 'test':
-            self.seperate_data(0.4)
+            self.seperate_data(0.2)
         else:
             pass
 
