@@ -15,6 +15,25 @@ import matplotlib.pyplot as plt
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 
+def f_measure(data_class,prediction):
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+    for i in range(0,len(data_class)):
+        if data_class[i] == 1 and prediction[i] == 1:
+             tp += 1
+        elif data_class[i] == 0 and prediction[i] == 0:
+            tn += 1
+        elif data_class[i] == 0 and prediction[i] == 1:
+            fp += 1
+        elif data_class[i] == 1 and prediction[i] == 0:
+            fn += 1
+    pre = tp/(tp+fp)
+    rec = tp/(tp+fn)
+    f_measure = 2*pre*rec/(pre+rec)
+    return f_measure
+
 # Get data:
 # module_train = Modules(subset='train', shuffle=True)
 module_all = Modules(subset='all', shuffle=False)
@@ -32,6 +51,11 @@ acc_GaussNB = list()
 acc_SGDClassifier = list()
 acc_SVC = list()
 acc_rf = list()
+f_MultiNB = list()
+f_GaussNB = list()
+f_SGDClassifier = list()
+f_SVC = list()
+f_rf = list()
 i_rec = list()
 
 # Loop for randomization (100 times):
@@ -65,6 +89,7 @@ for i in range(0,100):
     # MultinomialNB Testing
     predicted_MultiNB = text_clf_MultiNB.predict(x_test_lst)
     acc_MultiNB.append(np.mean(predicted_MultiNB == y_test_lst))
+    f_MultiNB.append(f_measure(y_test_lst,predicted_MultiNB))
 
     # Set GaussianNB Pipeline: (Does not work)
     text_clf_GaussNB = Pipeline([('vect', CountVectorizer()), ('tfidf', TfidfTransformer()), ('clf-GaussNB', GaussianNB())])
@@ -78,7 +103,7 @@ for i in range(0,100):
 
     # Set SGDClassifier Pipeline
     text_clf_SGDClassifier = Pipeline([('vect', CountVectorizer(stop_words='english')),('tfidf', TfidfTransformer(use_idf=True)),
-    ('clf-SGDClassifier', SGDClassifier(loss='hinge', penalty='l1', alpha=1e-3, n_iter_no_change=5, random_state=42))])
+    ('clf-SGDClassifier', SGDClassifier(loss='hinge', penalty='l1', alpha=1e-3))])
 
     # SGDClassifier Training:
     text_clf_SGDClassifier = text_clf_SGDClassifier.fit(x_train_lst, y_train_lst)
@@ -86,6 +111,7 @@ for i in range(0,100):
     # SGDClassifier Testing:
     predicted_SGDClassifier = text_clf_SGDClassifier.predict(x_test_lst)
     acc_SGDClassifier.append(np.mean(predicted_SGDClassifier == y_test_lst))
+    f_SGDClassifier.append(f_measure(y_test_lst,predicted_SGDClassifier))
     
     # Set SVC Pipeline
     text_clf_SVC = Pipeline([('vect', CountVectorizer()),('tfidf', TfidfTransformer(use_idf=True)),
@@ -97,6 +123,7 @@ for i in range(0,100):
     # SVC Testing:
     predicted_SVC = text_clf_SVC.predict(x_test_lst)
     acc_SVC.append(np.mean(predicted_SVC == y_test_lst))
+    f_SVC.append(f_measure(y_test_lst,predicted_SVC))
 
     # Set Random Forest Pipeline
     text_clf_rf = Pipeline([('vect', CountVectorizer(stop_words='english')),('tfidf', TfidfTransformer(use_idf=False)),
@@ -108,6 +135,7 @@ for i in range(0,100):
     # Random Forest Testing
     predicted_rf = text_clf_rf.predict(x_test_lst)
     acc_rf.append(np.mean(predicted_rf == y_test_lst))
+    f_rf.append(f_measure(y_test_lst,predicted_rf))
 
     i_rec.append(i)
 
@@ -118,24 +146,57 @@ np_acc_GaussNB = np.array(acc_GaussNB)
 np_acc_SGDClassifier = np.array(acc_SGDClassifier)
 np_acc_SVC = np.array(acc_SVC)
 np_acc_rf = np.array(acc_rf)
+np_f_MultiNB = np.array(f_MultiNB)
+np_f_GaussNB = np.array(f_GaussNB)
+np_f_SGDClassifier = np.array(f_SGDClassifier)
+np_f_SVC = np.array(f_SVC)
+np_f_rf = np.array(f_rf)
 
 # Average and standard deviation for accuracy:
-print("Average accuracy for Multinomial Naive Bayes: {}".format(np.mean(acc_MultiNB)))
-print("Standard deviation for Multinomial Naive Bayes: {}".format(np.std(acc_MultiNB)))
+print("Average accuracy for Multinomial Naive Bayes: {}".format(np.mean(np_acc_MultiNB)))
+print("Standard deviation for Multinomial Naive Bayes: {}".format(np.std(np_acc_MultiNB)))
+print("Average f-measure for Multinomial Naive Bayes: {}".format(np.mean(np_f_MultiNB)))
+print("Standard deviation of f-measure for Multinomial Naive Bayes: {}".format(np.std(np_f_MultiNB)))
 # print("Average accuracy for Gaussian Naive Bayes: {}".format(np.mean(acc_GaussNB)))
 # print("Standard deviation for Gaussian Naive Bayes: {}".format(np.std(acc_GaussNB)))
-print("Average accuracy for SGDClassifier: {}".format(np.mean(acc_SGDClassifier)))
-print("Standard deviation for SGDClassifier: {}".format(np.std(acc_SGDClassifier)))
-print("Average accuracy for Support Vector Classification: {}".format(np.mean(acc_SVC)))
-print("Standard deviation for Support Vector Classification: {}".format(np.std(acc_SVC)))
+print("Average accuracy for SGDClassifier: {}".format(np.mean(np_acc_SGDClassifier)))
+print("Standard deviation for SGDClassifier: {}".format(np.std(np_acc_SGDClassifier)))
+print("Average f-measure for SGDClassifier: {}".format(np.mean(np_f_SGDClassifier)))
+print("Standard deviation of f-measure for SGDClassifier: {}".format(np.std(np_f_SGDClassifier)))
+print("Average accuracy for Support Vector Classification: {}".format(np.mean(np_acc_SVC)))
+print("Standard deviation for Support Vector Classification: {}".format(np.std(np_acc_SVC)))
+print("Average f-measure for SVC: {}".format(np.mean(np_f_SVC)))
+print("Standard deviation of f-measure for SVC: {}".format(np.std(np_f_SVC)))
 print("Average accuracy for Random Forest: {}".format(np.mean(np_acc_rf)))
 print("Standard deviation for Random Forest: {}".format(np.std(np_acc_rf)))
+print("Average f-measure for Random Forest: {}".format(np.mean(np_f_rf)))
+print("Standard deviation of f-measure for Random Forest: {}".format(np.std(np_f_rf)))
 
 # Plots:
+plt.figure(1)
 plt.plot(i_rec,acc_MultiNB, label='MultiNB')
+plt.title("Accuracy: MultiNB")
 # plt.plot(i_rec,acc_GaussNB, label='GaussNB')
+plt.figure(2)
 plt.plot(i_rec,acc_SGDClassifier, label='SGDClassifier')
+plt.title("Accuracy: SGDClassifier")
+plt.figure(3)
 plt.plot(i_rec,acc_SVC, label='SVC')
+plt.title("Accuracy: SVC")
+plt.figure(4)
 plt.plot(i_rec,acc_rf, label='RF')
-plt.legend()
+plt.title("Accuracy: RF")
+plt.figure(5)
+plt.plot(i_rec,f_MultiNB, label='MultiNB')
+plt.title("f-measure: MultiNB")
+# plt.plot(i_rec,acc_GaussNB, label='GaussNB')
+plt.figure(6)
+plt.plot(i_rec,f_SGDClassifier, label='SGDClassifier')
+plt.title("f-measure: SGDClassifier")
+plt.figure(7)
+plt.plot(i_rec,f_SVC, label='SVC')
+plt.title("f-measure: SVC")
+plt.figure(8)
+plt.plot(i_rec,f_rf, label='RF')
+plt.title("f-measure: RF")
 plt.show()
