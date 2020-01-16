@@ -1,14 +1,51 @@
-from linkgrammar import *
+import linkgrammar
+import re
+import json
+
+
+po = linkgrammar.ParseOptions(min_null_count=0, max_null_count=999)
+en_dir = linkgrammar.Dictionary()
+
 # user_input = raw_input("Input an example sentence: ")
-user_input = "This is a simple sentence."
-user_input = "We will also compare and contrast a traditional diet with the modern Westernised UK diet and evaluate the respective abilities to maintain health and environment."
-sent = Sentence(user_input, Dictionary(), ParseOptions())
-linkages = sent.parse()
-print Clinkgrammar.sentence_num_linkages_found(sent._obj)
-for linkage in linkages:
-    print linkage.diagram()
-    print (type(linkage.postscript()))
-    links = linkage.postscript().split("]")
-    for link in links:
-        print link
-    break
+count = 0
+regex1 = re.compile('(i\.e\.)')
+regex2 = re.compile('(e\.g\.|e\.g)')
+regex3 = re.compile('(etc|etc.)')
+
+def s(q):
+    return '' if q == 1 else 's'
+
+def linkage_stat(psent, lang, lkgs, sent_po):
+    """
+    This function mimics the linkage status report style of link-parser
+    """
+    random = ' of {} random linkages'. \
+             format(linkgrammar.Clinkgrammar.sentence_num_linkages_post_processed((psent._obj))) \
+             if linkgrammar.Clinkgrammar.sentence_num_linkages_found(psent._obj) > sent_po.linkage_limit else ''
+
+    # print ('{}: Found {} linkage{} ({}{} had no P.P. violations)'. \
+    #       format(lang, linkgrammar.Clinkgrammar.sentence_num_linkages_found(psent._obj),
+    #              s(linkgrammar.Clinkgrammar.sentence_num_linkages_found(psent._obj)), len(lkgs), random))
+
+
+
+with open("../test.json", 'r') as file:
+    data = json.load(file)
+    for element in data['table']:
+        course_description = element['description']
+        print(course_description)
+        # course_description = "It will provide opportunity for students to develop strategies for enhancing and improving the performance of multi-professional initiatives."
+        description = regex3.sub('', regex2.sub('for example', regex1.sub('in other words', course_description)))
+        sent = linkgrammar.Sentence(description, en_dir, po)
+        linkages = sent.parse()
+        linkage_stat(sent, 'English', linkages, po)
+        if len(linkages) > 0:
+            count += 1
+
+        print(count)
+
+
+
+# description = ["This module aims to support students as they seek to make sense of the increasingly complex practice environment."]
+# sent = linkgrammar.Sentence(description, linkgrammar.Dictionary(), linkgrammar.ParseOptions())
+# linkages = sent.parse()
