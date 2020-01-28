@@ -85,7 +85,7 @@ for i in range(0,100):
 
     # MultinomialNB Training:
     text_clf_MultiNB = text_clf_MultiNB.fit(x_train_lst, y_train_lst)
-    
+
     # MultinomialNB Testing
     predicted_MultiNB = text_clf_MultiNB.predict(x_test_lst)
     acc_MultiNB.append(np.mean(predicted_MultiNB == y_test_lst))
@@ -96,7 +96,7 @@ for i in range(0,100):
 
     # GaussianNB Training:
     # text_clf_GaussNB = text_clf_GaussNB.fit(x_train_lst, y_train_lst)
-    
+
     # GaussianNB Testing
     # predicted_GaussNB = text_clf_GaussNB.predict(x_test_lst)
     # acc_GaussNB.append(np.mean(predicted_GaussNB == y_test_lst))
@@ -112,7 +112,7 @@ for i in range(0,100):
     predicted_SGDClassifier = text_clf_SGDClassifier.predict(x_test_lst)
     acc_SGDClassifier.append(np.mean(predicted_SGDClassifier == y_test_lst))
     f_SGDClassifier.append(f_measure(y_test_lst,predicted_SGDClassifier))
-    
+
     # Set SVC Pipeline
     text_clf_SVC = Pipeline([('vect', CountVectorizer()),('tfidf', TfidfTransformer(use_idf=True)),
     ('clf-SVC', SVC(C=2, kernel='linear'))])
@@ -128,7 +128,7 @@ for i in range(0,100):
     # Set Random Forest Pipeline
     text_clf_rf = Pipeline([('vect', CountVectorizer(stop_words='english')),('tfidf', TfidfTransformer(use_idf=False)),
     ('clf-rf', RandomForestClassifier(n_estimators=50, max_depth=None, bootstrap=False))])
-    
+
     # Random Forest Training:
     text_clf_rf = text_clf_rf.fit(x_train_lst, y_train_lst)
 

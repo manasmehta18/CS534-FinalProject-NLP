@@ -35,6 +35,8 @@ with open("../test.json", 'r') as file:
         description = regex3.sub('', regex2.sub('for example', regex1.sub('in other words', course_description)))
         word_list = tokenization(description)
         course_vector = text_vectorization(word_list)
+        data_array = np.append(course_vector,[int(element['label'])])
+        data_list = data_array.tolist()
         with open(r'vectorized_data.csv', mode='a') as course_vector_file:
             vector_writer = csv.writer(course_vector_file, delimiter=',')
-            vector_writer.writerow([course_vector,element['label']])
+            vector_writer.writerow(data_list)
