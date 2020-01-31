@@ -1,3 +1,4 @@
+# Import:
 import csv
 import random
 from sklearn.linear_model import SGDClassifier
@@ -6,6 +7,7 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import matplotlib.pyplot as plt
 
+# function to compute f-measure:
 def f_measure(data_class,prediction):
     tp = 0
     tn = 0
@@ -25,10 +27,12 @@ def f_measure(data_class,prediction):
     f_measure = 2*pre*rec/(pre+rec)
     return f_measure
 
+
+# Initialize lists for vectors and labels
 x = list()
 y = list()
 
-
+# Reading vectors and labels from csv file
 with open("../word_embedding/vectorized_data.csv") as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
@@ -54,30 +58,62 @@ i_rec = list()
 # Loop for randomization (100 times):
 for i in range(0,100):
     
+    # Shuffle vectors and labels with the same seed
     random.Random(i).shuffle(x)
     random.Random(i).shuffle(y)
 
-    # Cast into lists
+    # Cast into lists (seperating the training and testing by 0.8-0.2)
     x_train_lst = x[0:int(0.8*len(x))]
     y_train_lst = y[0:int(0.8*len(y))]
     x_test_lst = x[int(0.8*len(x)):len(x)]
     y_test_lst = y[int(0.8*len(y)):len(y)]
 
-    clf_SGDClassifier = SGDClassifier()
+    # SGDClassifier:
+    clf_SGDClassifier = SGDClassifier(alpha=1e-4,loss='hinge',penalty='l2')
     clf_SGDClassifier.fit(x_train_lst,y_train_lst)
 
     predicted_SGDClassifier = clf_SGDClassifier.predict(x_test_lst)
     acc_SGDClassifier.append(np.mean(predicted_SGDClassifier == y_test_lst))
     f_SGDClassifier.append(f_measure(y_test_lst,predicted_SGDClassifier))
 
+    # SVC:
+    clf_SVC = SVC(C=5,kernel='linear')
+    clf_SVC.fit(x_train_lst,y_train_lst)
+
+    predicted_SVC = clf_SVC.predict(x_test_lst)
+    acc_SVC.append(np.mean(predicted_SVC == y_test_lst))
+    f_SVC.append(f_measure(y_test_lst,predicted_SVC))
+
+    # Random Forest:
+    clf_rf = RandomForestClassifier(n_estimators=100, max_depth=None, bootstrap=False)
+    clf_rf.fit(x_train_lst,y_train_lst)
+
+    predicted_rf = clf_rf.predict(x_test_lst)
+    acc_rf.append(np.mean(predicted_rf == y_test_lst))
+    f_rf.append(f_measure(y_test_lst,predicted_rf))
+
     i_rec.append(i)
 
 
+# f-measure results:
 np_f_SGDClassifier = np.array(f_SGDClassifier)
+np_f_SVC = np.array(f_SVC)
+np_f_rf = np.array(f_rf)
 print("Average f-measure for SGDClassifier: {}".format(np.mean(np_f_SGDClassifier)))
 print("Standard deviation of f-measure for SGDClassifier: {}".format(np.std(np_f_SGDClassifier)))
+print("Average f-measure for SVC: {}".format(np.mean(np_f_SVC)))
+print("Standard deviation of f-measure for SVC: {}".format(np.std(np_f_SVC)))
+print("Average f-measure for Random Forest: {}".format(np.mean(np_f_rf)))
+print("Standard deviation of f-measure for Random Forest: {}".format(np.std(np_f_rf)))
 
+# Plots:
 plt.figure(1)
 plt.plot(i_rec,f_SGDClassifier, label='SGDClassifier')
 plt.title("f-measure: SGDClassifier")
+plt.figure(2)
+plt.plot(i_rec,f_SVC, label='SVC')
+plt.title("f-measure: SVC")
+plt.figure(3)
+plt.plot(i_rec,f_rf, label='RF')
+plt.title("f-measure: RF")
 plt.show()
