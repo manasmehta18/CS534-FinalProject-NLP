@@ -6,6 +6,7 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 
 # function to compute f-measure:
 def f_measure(data_class,prediction):
@@ -107,13 +108,20 @@ print("Average f-measure for Random Forest: {}".format(np.mean(np_f_rf)))
 print("Standard deviation of f-measure for Random Forest: {}".format(np.std(np_f_rf)))
 
 # Plots:
+matplotlib.rcParams['axes.linewidth'] = 3
 plt.figure(1)
-plt.plot(i_rec,f_SGDClassifier, label='SGDClassifier')
+plt.plot(i_rec,f_SGDClassifier, 'b', label='SGDClassifier', linewidth=2)
 plt.title("f-measure: SGDClassifier")
+plt.xlabel('Seed')
+plt.ylabel('f-measure')
 plt.figure(2)
-plt.plot(i_rec,f_SVC, label='SVC')
+plt.plot(i_rec,f_SVC, 'b', label='SVC', linewidth=2)
 plt.title("f-measure: SVC")
+plt.xlabel('Seed')
+plt.ylabel('f-measure')
 plt.figure(3)
-plt.plot(i_rec,f_rf, label='RF')
+plt.plot(i_rec,f_rf, 'b', label='RF', linewidth=2)
 plt.title("f-measure: RF")
+plt.xlabel('Seed')
+plt.ylabel('f-measure')
 plt.show()
